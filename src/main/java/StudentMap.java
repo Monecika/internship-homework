@@ -107,10 +107,11 @@ public class StudentMap implements Map<Student, Integer> {
     public Set<Student> keySet() {
         Set<Student> set = new HashSet<>();
         for (LinkedList<MyEntry> myEntries : map)
-            for (MyEntry entry : myEntries)
+            if (myEntries != null) for (MyEntry entry : myEntries)
                 set.add(entry.getKey());
         return set;
     }
+
 
     @Override
     public Collection<Integer> values() {
