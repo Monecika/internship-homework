@@ -1,27 +1,27 @@
 import java.util.Map;
 
-public class MyEntry implements Map.Entry<Student, Integer> {
-    private Student key;
-    private Integer value;
+public class MyEntry<K, V> implements Map.Entry<K, V> {
+    private K key;
+    private V value;
 
-    public MyEntry(Student key, Integer value) {
+    public MyEntry(K key, V value) {
         this.key = key;
         this.value = value;
     }
 
-    public Student getKey() {
+    public K getKey() {
         return key;
     }
 
-    public void setKey(Student key) {
+    public void setKey(K key) {
         this.key = key;
     }
 
-    public Integer getValue() {
+    public V getValue() {
         return value;
     }
 
-    public Integer setValue(Integer value) {
+    public V setValue(V value) {
         this.value = value;
         return value;
     }

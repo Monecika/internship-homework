@@ -1,9 +1,8 @@
 import java.util.*;
 
-
-public class StudentMap implements Map<Student, Integer> {
+public class StudentMap<K, V> implements Map<K, V> {
     private static final int ARRAY_SIZE = 16;
-    private LinkedList<MyEntry>[] map = new LinkedList[ARRAY_SIZE];
+    private LinkedList<MyEntry<K, V>>[] map = new LinkedList[ARRAY_SIZE];
     private int size = 0;
 
     public StudentMap() {
@@ -21,65 +20,76 @@ public class StudentMap implements Map<Student, Integer> {
 
     @Override
     public boolean containsKey(Object key) {
-        int index = getIndexOf((Student) key);
-
+        int index = getIndexOf(key);
         if (map[index] != null) {
-            for (MyEntry entry : map[index])
+            for (MyEntry<K, V> entry : map[index]) {
                 if (entry.getKey()
                          .equals(key)) return true;
+            }
         }
         return false;
     }
 
     @Override
     public boolean containsValue(Object value) {
-        for (LinkedList<MyEntry> myEntries : map)
-            for (MyEntry entry : myEntries)
-                if (entry.getValue()
-                         .equals(value)) return true;
+        for (LinkedList<MyEntry<K, V>> myEntries : map) {
+            if (myEntries != null) {
+                for (MyEntry<K, V> entry : myEntries) {
+                    if (entry.getValue()
+                             .equals(value)) return true;
+                }
+            }
+        }
         return false;
     }
 
     @Override
-    public Integer get(Object key) {
-        if (containsKey(key)) {
-            int index = getIndexOf((Student) key);
-            if (map[index] != null) {
-                for (MyEntry entry : map[index])
-                    if (entry.getKey()
-                             .equals(key)) return entry.getValue();
+    public V get(Object key) {
+        int index = getIndexOf(key);
+        if (map[index] != null) {
+            for (MyEntry<K, V> entry : map[index]) {
+                if (entry.getKey()
+                         .equals(key)) return entry.getValue();
             }
         }
         return null;
     }
 
     @Override
-    public Integer put(Student key, Integer value) {
+    public V put(K key, V value) {
         if (size >= map.length) resize();
         int index = getIndexOf(key);
 
         if (map[index] == null) {
             map[index] = new LinkedList<>();
-            map[index].add(new MyEntry(key, value));
-            size++;
-        } else {
-            for (MyEntry entry : map[index]) {
-                if (entry.getKey()
-                         .equals(key)) entry.setValue(value);
+        }
+
+        for (MyEntry<K, V> entry : map[index]) {
+            if (entry.getKey()
+                     .equals(key)) {
+                V oldValue = entry.getValue();
+                entry.setValue(value);
+                return oldValue;
             }
         }
+
+        map[index].add(new MyEntry<>(key, value));
+        size++;
         return null;
     }
 
     @Override
-    public Integer remove(Object key) {
-        int index = getIndexOf((Student) key);
+    public V remove(Object key) {
+        int index = getIndexOf(key);
         if (map[index] != null) {
-            MyEntry toRemove = null;
+            MyEntry<K, V> toRemove = null;
 
-            for (MyEntry entry : map[index]) {
+            for (MyEntry<K, V> entry : map[index]) {
                 if (entry.getKey()
-                         .equals(key)) toRemove = entry;
+                         .equals(key)) {
+                    toRemove = entry;
+                    break;
+                }
             }
 
             if (toRemove != null) {
@@ -92,9 +102,10 @@ public class StudentMap implements Map<Student, Integer> {
     }
 
     @Override
-    public void putAll(Map<? extends Student, ? extends Integer> m) {
-        for (Entry<? extends Student, ? extends Integer> entry : m.entrySet())
+    public void putAll(Map<? extends K, ? extends V> m) {
+        for (Entry<? extends K, ? extends V> entry : m.entrySet()) {
             put(entry.getKey(), entry.getValue());
+        }
     }
 
     @Override
@@ -104,46 +115,57 @@ public class StudentMap implements Map<Student, Integer> {
     }
 
     @Override
-    public Set<Student> keySet() {
-        Set<Student> set = new HashSet<>();
-        for (LinkedList<MyEntry> myEntries : map)
-            if (myEntries != null) for (MyEntry entry : myEntries)
-                set.add(entry.getKey());
+    public Set<K> keySet() {
+        Set<K> set = new HashSet<>();
+        for (LinkedList<MyEntry<K, V>> myEntries : map) {
+            if (myEntries != null) {
+                for (MyEntry<K, V> entry : myEntries) {
+                    set.add(entry.getKey());
+                }
+            }
+        }
         return set;
     }
 
-
     @Override
-    public Collection<Integer> values() {
-        List<Integer> list = new ArrayList<>();
-        for (LinkedList<MyEntry> myEntries : map)
-            for (MyEntry entry : myEntries)
-                list.add(entry.getValue());
+    public Collection<V> values() {
+        List<V> list = new ArrayList<>();
+        for (LinkedList<MyEntry<K, V>> myEntries : map) {
+            if (myEntries != null) {
+                for (MyEntry<K, V> entry : myEntries) {
+                    list.add(entry.getValue());
+                }
+            }
+        }
         return list;
     }
 
     @Override
-    public Set<Entry<Student, Integer>> entrySet() {
-        Set<Entry<Student, Integer>> entries = new HashSet<>();
-        for (LinkedList<MyEntry> myEntries : map)
-            entries.addAll(myEntries);
+    public Set<Entry<K, V>> entrySet() {
+        Set<Entry<K, V>> entries = new HashSet<>();
+        for (LinkedList<MyEntry<K, V>> myEntries : map) {
+            if (myEntries != null) {
+                entries.addAll(myEntries);
+            }
+        }
         return entries;
     }
 
     private void resize() {
-        LinkedList<MyEntry>[] oldMap = map;
+        LinkedList<MyEntry<K, V>>[] oldMap = map;
         map = new LinkedList[size * 2];
         size = 0;
 
-        for (LinkedList<MyEntry> myEntries : oldMap) {
-            if (myEntries == null) continue;
-            for (MyEntry entry : myEntries) {
-                put(entry.getKey(), entry.getValue());
+        for (LinkedList<MyEntry<K, V>> myEntries : oldMap) {
+            if (myEntries != null) {
+                for (MyEntry<K, V> entry : myEntries) {
+                    put(entry.getKey(), entry.getValue());
+                }
             }
         }
     }
 
-    private int getIndexOf(Student key) {
+    private int getIndexOf(Object key) {
         return key.hashCode() % map.length;
     }
 }
